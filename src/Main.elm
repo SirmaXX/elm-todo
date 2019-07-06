@@ -3,7 +3,7 @@
 import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (..)
+import Html.Events exposing (onClick,onInput)
 
 
 
@@ -28,6 +28,7 @@ init =
 type Msg
     =AddTodo     
     | RemoveItem String
+    |TodoText String
     | RemoveAll     
 
 
@@ -39,6 +40,8 @@ update msg model =
 
        AddTodo ->
          { model | todos = model.todo :: model.todos }
+       TodoText s ->
+           {model| todo=s}
 
        RemoveItem text ->
          { model | todos = List.filter (\x -> x /= text) model.todos }
@@ -51,7 +54,7 @@ view : Model -> Html Msg
 view model =
         div []
         [
-          input [ value model.todo] []
+          input [ value model.todo, onInput TodoText  ] []
         , button [ onClick AddTodo, class "btn btn-primary" ] [ text "Submit" ]
         , button [ onClick RemoveAll, class "btn btn-danger" ] [ text "Remove All" ]
         , todoList model.todos
