@@ -10,6 +10,7 @@ import Bootstrap.ListGroup as ListGroup
 import Bootstrap.Form as Form
 import Bootstrap.Form.Input as Input
 import Bootstrap.Button as Button
+import Bootstrap.Alert as Alert
 
 main =
   Browser.sandbox { init = init, update = update, view = view }
@@ -20,12 +21,13 @@ type alias Model =
     { todo : String
     , todos : List String
     , success :Bool
+    ,alertVisibility : Alert.Visibility
     }
 
 
 init : Model
 init =
-    {todo ="", todos =[],success =False}  
+    {todo ="", todos =[],success =False,alertVisibility = Alert.closed}  
 
 --update
 
@@ -34,25 +36,28 @@ type Msg
     =AddTodo     
     | RemoveItem String
     |TodoText String
-    | RemoveAll     
+    | RemoveAll
+    |AlertMsg Alert.Visibility     
 
 
 update : Msg -> Model -> Model
 update msg model =
     case msg of
        RemoveAll ->
-         { model | todos = [] ,success=False}
+         { model | todos = [] ,success=False,alertVisibility = Alert.closed}
 
        AddTodo ->
-         { model | todos = model.todo :: model.todos ,success=True} 
+         { model | todos = model.todo :: model.todos ,success=True,alertVisibility = Alert.shown} 
 
        TodoText s ->
            {model| todo=s}
 
        RemoveItem text ->
-         { model | todos = List.filter (\x -> x /= text) model.todos,success=False }
-
-
+         { model | todos = List.filter (\x -> x /= text) model.todos,success=False,alertVisibility = Alert.closed }
+        
+       AlertMsg visibility ->
+            { model | alertVisibility = visibility }
+   
 --view
 
 
@@ -63,10 +68,10 @@ view model =
         ,Grid.row [ Row.centerXs]  
           [Grid.col[Col.lg2] [],     
          Grid.col [Col.lg8] [ h1 [ ] [ text "TodoList For Beginners" ]
+        ,viewValidation model
         , input [ value model.todo, onInput TodoText  ] []
         , button [ onClick AddTodo, class "btn btn-primary" ] [ text "Submit" ]
         , button [ onClick RemoveAll, class "btn btn-danger" ] [ text "Remove All" ]
-        ,viewValidation model
         , todoList model.todos
         ]  , Grid.col [Col.lg2  ] [ ]
         ]
@@ -87,9 +92,27 @@ todoList todos =
         ul [ class "list-group" ] child
 
 
-viewValidation : Model -> Html msg
+
+viewValidation : Model -> Html Msg
 viewValidation model =
   if model.success then
-    div [ style "color" "green" ] [ text "OK" ]
+    succeed model
   else
    text " " 
+
+
+succeed : Model -> Html Msg
+succeed model =
+    Alert.config
+        |> Alert.success
+        |> Alert.dismissable AlertMsg
+        |> Alert.children
+            [ 
+            text "Yapılacak iş listeye eklendi"
+            ]
+        |> Alert.view model.alertVisibility
+
+
+
+
+
