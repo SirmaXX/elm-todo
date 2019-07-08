@@ -20,14 +20,14 @@ main =
 type alias Model =
     { todo : String
     , todos : List String
-    , success :Bool
+    , success :Int
     ,alertVisibility : Alert.Visibility
     }
 
 
 init : Model
 init =
-    {todo ="", todos =[],success =False,alertVisibility = Alert.closed}  
+    {todo ="", todos =[],success =10 ,alertVisibility = Alert.closed}  
 
 --update
 
@@ -44,16 +44,16 @@ update : Msg -> Model -> Model
 update msg model =
     case msg of
        RemoveAll ->
-         { model | todos = [] ,success=False,alertVisibility = Alert.closed}
+         { model | todos = [] ,success=0,alertVisibility = Alert.shown}
 
        AddTodo ->
-         { model | todos = model.todo :: model.todos ,success=True,alertVisibility = Alert.shown} 
+         { model | todos = model.todo :: model.todos ,success=1,alertVisibility = Alert.shown} 
 
        TodoText s ->
            {model| todo=s}
 
        RemoveItem text ->
-         { model | todos = List.filter (\x -> x /= text) model.todos,success=False,alertVisibility = Alert.closed }
+         { model | todos = List.filter (\x -> x /= text) model.todos,success=2,alertVisibility = Alert.shown }
         
        AlertMsg visibility ->
             { model | alertVisibility = visibility }
@@ -95,11 +95,14 @@ todoList todos =
 
 viewValidation : Model -> Html Msg
 viewValidation model =
-  if model.success then
+  if model.success == 1 then
     succeed model
-  else
-   text " " 
-
+  else if model.success == 0 then
+    deleteall model
+  else if model.success == 2 then
+   deleteitem model
+  else 
+     text " "
 
 succeed : Model -> Html Msg
 succeed model =
@@ -108,11 +111,32 @@ succeed model =
         |> Alert.dismissable AlertMsg
         |> Alert.children
             [ 
-            text "Yapılacak iş listeye eklendi"
+            text "Yapılacak şey listeye eklendi"
             ]
         |> Alert.view model.alertVisibility
 
 
 
+deleteitem : Model -> Html Msg
+deleteitem model =
+    Alert.config
+        |> Alert.warning
+        |> Alert.dismissable AlertMsg
+        |> Alert.children
+            [ 
+            text "Listeden bir iş silindi"
+            ]
+        |> Alert.view model.alertVisibility
 
+
+deleteall : Model -> Html Msg
+deleteall model =
+    Alert.config
+        |> Alert.danger
+        |> Alert.dismissable AlertMsg
+        |> Alert.children
+            [ 
+            text "Bütün Yapılacaklar silindi"
+            ]
+        |> Alert.view model.alertVisibility
 
