@@ -4,7 +4,14 @@ import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick,onInput)
-
+import Bootstrap.CDN as CDN
+import Bootstrap.Grid as Grid
+import Bootstrap.Grid.Row as Row 
+import Bootstrap.Grid.Col as Col
+import Bootstrap.ListGroup as ListGroup
+import Bootstrap.Form as Form
+import Bootstrap.Form.Input as Input
+import Bootstrap.Button as Button
 
 
 main =
@@ -39,7 +46,8 @@ update msg model =
          { model | todos = [] }
 
        AddTodo ->
-         { model | todos = model.todo :: model.todos }
+         { model | todos = model.todo :: model.todos } 
+
        TodoText s ->
            {model| todo=s}
 
@@ -52,18 +60,24 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-        div []
-        [
-          input [ value model.todo, onInput TodoText  ] []
+     Grid.container []
+      [CDN.stylesheet -- creates an inline style node with the Bootstrap CSS
+        ,Grid.row [ Row.centerXs]  
+          [Grid.col[Col.lg2] [],     
+         Grid.col [Col.lg8] [ h1 [ ] [ text "TodoList For Beginners" ]
+        , input [ value model.todo, onInput TodoText  ] []
         , button [ onClick AddTodo, class "btn btn-primary" ] [ text "Submit" ]
         , button [ onClick RemoveAll, class "btn btn-danger" ] [ text "Remove All" ]
         , todoList model.todos
+        ]  , Grid.col [Col.lg2  ] [ ]
         ]
+    ]
+
 
 todoItem : String -> Html Msg
 todoItem todo =
     li [ class "list-group-item" ] [ text todo, button [ onClick (RemoveItem todo), class "btn btn-info" ] [ text "x" ] ]
---sorun burada 1 texti görüntüleyemiyorum
+
 
 todoList : List String -> Html Msg
 todoList todos =
@@ -72,4 +86,5 @@ todoList todos =
             List.map todoItem todos
     in
         ul [ class "list-group" ] child
+
 
