@@ -20,14 +20,14 @@ main =
 type alias Model =
     { todo : String
     , todos : List String
-    , success :Int
+    , popup:Int
     ,alertVisibility : Alert.Visibility
     }
 
 
 init : Model
 init =
-    {todo ="", todos =[],success =10 ,alertVisibility = Alert.closed}  
+    {todo ="", todos =[],popup =10 ,alertVisibility = Alert.closed}  
 
 --update
 
@@ -44,16 +44,16 @@ update : Msg -> Model -> Model
 update msg model =
     case msg of
        RemoveAll ->
-         { model | todos = [] ,success=0,alertVisibility = Alert.shown}
+         { model | todos = [] ,popup=0,alertVisibility = Alert.shown}
 
        AddTodo ->
-         { model | todos = model.todo :: model.todos ,success=1,alertVisibility = Alert.shown} 
+         { model | todos = model.todo :: model.todos ,popup=1,alertVisibility = Alert.shown} 
 
        TodoText s ->
            {model| todo=s}
 
        RemoveItem text ->
-         { model | todos = List.filter (\x -> x /= text) model.todos,success=2,alertVisibility = Alert.shown }
+         { model | todos = List.filter (\x -> x /= text) model.todos,popup=2,alertVisibility = Alert.shown }
         
        AlertMsg visibility ->
             { model | alertVisibility = visibility }
@@ -95,11 +95,11 @@ todoList todos =
 
 viewValidation : Model -> Html Msg
 viewValidation model =
-  if model.success == 1 then
+  if model.popup == 1 then
     succeed model
-  else if model.success == 0 then
+  else if model.popup == 0 then
     deleteall model
-  else if model.success == 2 then
+  else if model.popup == 2 then
    deleteitem model
   else 
      text " "
