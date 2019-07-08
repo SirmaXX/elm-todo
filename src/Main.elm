@@ -1,5 +1,3 @@
-
-
 import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -13,7 +11,6 @@ import Bootstrap.Form as Form
 import Bootstrap.Form.Input as Input
 import Bootstrap.Button as Button
 
-
 main =
   Browser.sandbox { init = init, update = update, view = view }
 
@@ -22,12 +19,13 @@ main =
 type alias Model =
     { todo : String
     , todos : List String
+    , success :Bool
     }
 
 
 init : Model
 init =
-    {todo ="", todos =[]}  
+    {todo ="", todos =[],success =False}  
 
 --update
 
@@ -43,16 +41,16 @@ update : Msg -> Model -> Model
 update msg model =
     case msg of
        RemoveAll ->
-         { model | todos = [] }
+         { model | todos = [] ,success=False}
 
        AddTodo ->
-         { model | todos = model.todo :: model.todos } 
+         { model | todos = model.todo :: model.todos ,success=True} 
 
        TodoText s ->
            {model| todo=s}
 
        RemoveItem text ->
-         { model | todos = List.filter (\x -> x /= text) model.todos }
+         { model | todos = List.filter (\x -> x /= text) model.todos,success=False }
 
 
 --view
@@ -68,6 +66,7 @@ view model =
         , input [ value model.todo, onInput TodoText  ] []
         , button [ onClick AddTodo, class "btn btn-primary" ] [ text "Submit" ]
         , button [ onClick RemoveAll, class "btn btn-danger" ] [ text "Remove All" ]
+        ,viewValidation model
         , todoList model.todos
         ]  , Grid.col [Col.lg2  ] [ ]
         ]
@@ -88,3 +87,9 @@ todoList todos =
         ul [ class "list-group" ] child
 
 
+viewValidation : Model -> Html msg
+viewValidation model =
+  if model.success then
+    div [ style "color" "green" ] [ text "OK" ]
+  else
+   text " " 
