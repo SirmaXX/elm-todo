@@ -6,14 +6,16 @@ import Bootstrap.CDN as CDN
 import Bootstrap.Grid as Grid
 import Bootstrap.Grid.Row as Row 
 import Bootstrap.Grid.Col as Col
-import Bootstrap.ListGroup as ListGroup
+import Bootstrap.ListGroup as Listgroup
 import Bootstrap.Form as Form
 import Bootstrap.Form.Input as Input
 import Bootstrap.Button as Button
 import Bootstrap.Alert as Alert
+import Bootstrap.Form.Checkbox as Checkbox
+import Bootstrap.Card as Card
 
 main =
-  Browser.sandbox { init = init, update = update, view = view }
+  Browser.sandbox{ init = init, update = update, view = view }
 
 
 
@@ -72,10 +74,12 @@ view model =
         , input [ value model.todo, onInput TodoText  ] []
         , button [ onClick AddTodo, class "btn btn-primary" ] [ text "Submit" ]
         , button [ onClick RemoveAll, class "btn btn-danger" ] [ text "Remove All" ]
-        , todoList model.todos
+         ,todoList model.todos 
         ]  , Grid.col [Col.lg2  ] [ ]
         ]
     ]
+
+
 
 
 todoItem : String -> Html Msg
@@ -92,17 +96,22 @@ todoList todos =
         ul [ class "list-group" ] child
 
 
-
 viewValidation : Model -> Html Msg
 viewValidation model =
-  if model.popup == 1 then
-    succeed model
-  else if model.popup == 0 then
-    deleteall model
-  else if model.popup == 2 then
-   deleteitem model
-  else 
-     text " "
+   case model.popup of
+     0 ->
+       deleteall model
+     1 ->
+       succeed model
+     2 ->
+       deleteitem model
+     _ ->
+       text " "
+
+  
+
+  
+
 
 succeed : Model -> Html Msg
 succeed model =
