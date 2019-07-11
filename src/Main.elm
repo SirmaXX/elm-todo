@@ -113,7 +113,11 @@ view model =
 
 todoItem : Todo -> Html Msg
 todoItem todoitem =
-    li [ class "list-group-item" ] [ text todoitem.todo, button [ onClick (RemoveItem   todoitem.id), class "btn btn-info" ] [ text "x" ],
+    li [ class "list-group-item" ] [ 
+       if todoitem.completed == True then
+         div [ style "color" "green" ] [ text todoitem.todo ]
+       else
+       div [ style "color" "red" ] [ text todoitem.todo], button [ onClick (RemoveItem   todoitem.id), class "btn btn-info" ] [ text "x" ],
   input[ class "toggle-all",type_ "checkbox", checked todoitem.completed, onClick (Check todoitem.id (not todoitem.completed)) ][] ]
                
                
@@ -128,7 +132,6 @@ todoList todos=
             List.map todoItem todos.todos
     in
         ul [ class "list-group" ] child
-
 
 
 
