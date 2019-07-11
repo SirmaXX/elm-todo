@@ -12,10 +12,17 @@ import Bootstrap.Form.Input as Input
 import Bootstrap.Button as Button
 import Bootstrap.Alert as Alert
 import Bootstrap.Form.Checkbox as Checkbox
-import Bootstrap.Card as Card
+
+--MAİN
 
 main =
-  Browser.sandbox{ init = init, update = update, view = view }
+    Browser.document
+        { init = init
+        , update = update
+        , subscriptions = subscriptions
+        , view = view
+       }
+
 
 
 
@@ -43,12 +50,16 @@ newTodo id todo =
 
 
 
+--INIT
 
-init : Model
-init =
-    {todos =[],entry="",popup =10 ,alertVisibility = Alert.closed,uid=0}  
 
---update
+init : () -> ( Model, Cmd Msg )
+init _ =
+    ({alertVisibility = Alert.closed,entry="",popup =10 ,todos =[],uid=0} ,Cmd.none)
+  
+   
+
+--UPDATE
 
 
 type Msg
@@ -60,23 +71,23 @@ type Msg
     |Check Int Bool   
 
 
-update : Msg -> Model -> Model
+update : Msg -> Model ->(Model,Cmd Msg)
 update msg model =
     case msg of
        RemoveAll ->
-         { model | todos = [] ,popup=0,alertVisibility = Alert.shown}
+        ( { model | todos = [] ,popup=0,alertVisibility = Alert.shown}, Cmd.none )
 
        AddTodo ->
-         { model | todos =model.todos ++ [newTodo model.uid  model.entry  ], entry="" ,popup=1,alertVisibility = Alert.shown,uid=model.uid+1} 
+        ( { model | todos =model.todos ++ [newTodo model.uid  model.entry  ], entry="" ,popup=1,alertVisibility = Alert.shown,uid=model.uid+1} , Cmd.none )
 
        TodoText text ->
-           {model| entry =text }
+          ({model| entry =text }, Cmd.none )
 
        RemoveItem id ->
-           { model |  todos = List.filter (\t-> t.id /= id) model.todos,popup=2,alertVisibility = Alert.shown }
+           ({ model |  todos = List.filter (\t-> t.id /= id) model.todos,popup=2,alertVisibility = Alert.shown }, Cmd.none )
         
        AlertMsg visibility ->
-            { model | alertVisibility = visibility }
+            ({ model | alertVisibility = visibility }, Cmd.none )
 
        Check id isCompleted ->
             let
@@ -84,17 +95,29 @@ update msg model =
                     if t.id == id then
                         { t | completed =isCompleted }
                     else
-                        t
+                         t 
             in
-             { model | todos = List.map updateEntry model.todos ,popup=3,alertVisibility = Alert.shown }
-            
+              ({ model | todos = List.map updateEntry model.todos ,popup=3,alertVisibility = Alert.shown }, Cmd.none )
 
---view
+--SUBSCRİPTİONS
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.none
 
 
-view : Model -> Html Msg
-view model =
-     Grid.container []
+type alias Document msg =
+    { title : String
+    , body : List (Html msg)
+    }
+
+--VİEW
+
+view : Model -> Browser.Document Msg
+view model = 
+ {  title = "Elm Todo Application"
+   , body =
+   [  Grid.container []
       [CDN.stylesheet -- creates an inline style node with the Bootstrap CSS
         ,Grid.row [ Row.centerXs]  
           [Grid.col[Col.lg2] [],     
@@ -107,8 +130,8 @@ view model =
         ]  , Grid.col [Col.lg2  ] [ ]
         ]
     ]
-
-
+   ]
+ }
 
 
 todoItem : Todo -> Html Msg
@@ -117,12 +140,9 @@ todoItem todoitem =
        if todoitem.completed == True then
          div [ style "color" "green" ] [ text todoitem.todo ]
        else
-       div [ style "color" "red" ] [ text todoitem.todo], button [ onClick (RemoveItem   todoitem.id), class "btn btn-info" ] [ text "x" ],
+       div [ ] [ text todoitem.todo], button [ onClick (RemoveItem   todoitem.id), class "btn btn-info" ] [ text "x" ],
   input[ class "toggle-all",type_ "checkbox", checked todoitem.completed, onClick (Check todoitem.id (not todoitem.completed)) ][] ]
                
-               
-             
-
 
 
 todoList : Model -> Html Msg
@@ -161,7 +181,7 @@ succeed model =
         |> Alert.dismissable AlertMsg
         |> Alert.children
             [ 
-            text "Yapılacak şey listeye eklendi"
+            text "Yapılacak iş listeye eklendi"
             ]
         |> Alert.view model.alertVisibility
 
