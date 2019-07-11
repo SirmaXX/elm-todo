@@ -20,23 +20,40 @@ main =
 
 
 type alias Model =
-    { todo : String
-    , todos : List String
-    , popup:Int
-    ,alertVisibility : Alert.Visibility
+    { todos : List Todo
+     ,alertVisibility : Alert.Visibility
+     ,entry:String
+     ,popup:Int
+     ,uid : Int
     }
+
+type alias Todo =
+    {   id :Int
+       ,todo :String
+       ,completed:Bool
+         }
+
+
+newTodo : Int -> String -> Todo
+newTodo id todo =
+  { id = id
+  , todo = todo
+  , completed = False
+  }
+
+
 
 
 init : Model
 init =
-    {todo ="", todos =[],popup =10 ,alertVisibility = Alert.closed}  
+    {todos =[],entry="",popup =10 ,alertVisibility = Alert.closed,uid=1}  
 
 --update
 
 
 type Msg
     =AddTodo     
-    | RemoveItem String
+    | RemoveItem Int
     |TodoText String
     | RemoveAll
     |AlertMsg Alert.Visibility     
@@ -49,13 +66,13 @@ update msg model =
          { model | todos = [] ,popup=0,alertVisibility = Alert.shown}
 
        AddTodo ->
-         { model | todos = model.todo :: model.todos ,popup=1,alertVisibility = Alert.shown} 
+         { model | todos =model.todos ++ [newTodo model.uid  model.entry    ]  ,entry="" ,popup=1,alertVisibility = Alert.shown} 
 
-       TodoText s ->
-           {model| todo=s}
+       TodoText text ->
+           {model| entry =text }
 
-       RemoveItem text ->
-         { model | todos = List.filter (\x -> x /= text) model.todos,popup=2,alertVisibility = Alert.shown }
+       RemoveItem id ->
+           { model | todos = List.filter (\t -> t.id /= id) model.todos,popup=2,alertVisibility = Alert.shown }
         
        AlertMsg visibility ->
             { model | alertVisibility = visibility }
@@ -71,10 +88,10 @@ view model =
           [Grid.col[Col.lg2] [],     
          Grid.col [Col.lg8] [ h1 [ ] [ text "TodoList For Beginners" ]
         ,viewValidation model
-        , input [ value model.todo, onInput TodoText  ] []
+        , input [ value model.entry, onInput TodoText  ] []
         , button [ onClick AddTodo, class "btn btn-primary" ] [ text "Submit" ]
         , button [ onClick RemoveAll, class "btn btn-danger" ] [ text "Remove All" ]
-         ,todoList model.todos 
+         ,todoList model
         ]  , Grid.col [Col.lg2  ] [ ]
         ]
     ]
@@ -82,16 +99,16 @@ view model =
 
 
 
-todoItem : String -> Html Msg
-todoItem todo =
-    li [ class "list-group-item" ] [ text todo, button [ onClick (RemoveItem todo), class "btn btn-info" ] [ text "x" ] ]
+todoItem : Todo -> Html Msg
+todoItem todoitem =
+    li [ class "list-group-item" ] [ text todoitem.todo, button [ onClick (RemoveItem todoitem.id), class "btn btn-info" ] [ text "x" ] ]
 
 
-todoList : List String -> Html Msg
-todoList todos =
+todoList : Model -> Html Msg
+todoList model =
     let
         child =
-            List.map todoItem todos
+            List.map todoItem model.todos
     in
         ul [ class "list-group" ] child
 
