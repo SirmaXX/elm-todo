@@ -19,6 +19,6 @@ elm reactor
 * **Deniz Balcı** - *Student-J.developer* -(https://github.com/SirmaXX)
 
 
-##Thanks
+## Thanks for helping
 @NikosEfthias
 @jessta
