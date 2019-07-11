@@ -56,7 +56,8 @@ type Msg
     | RemoveItem Int
     |TodoText String
     | RemoveAll
-    |AlertMsg Alert.Visibility     
+    |AlertMsg Alert.Visibility 
+    |Check Int Bool   
 
 
 update : Msg -> Model -> Model
@@ -76,7 +77,18 @@ update msg model =
         
        AlertMsg visibility ->
             { model | alertVisibility = visibility }
-   
+
+       Check id isCompleted ->
+            let
+                updateEntry t =
+                    if t.id == id then
+                        { t | completed =isCompleted }
+                    else
+                        t
+            in
+             { model | todos = List.map updateEntry model.todos ,popup=3,alertVisibility = Alert.shown }
+            
+
 --view
 
 
@@ -101,7 +113,12 @@ view model =
 
 todoItem : Todo -> Html Msg
 todoItem todoitem =
-    li [ class "list-group-item" ] [ text todoitem.todo, button [ onClick (RemoveItem   todoitem.id), class "btn btn-info" ] [ text "x" ] ]
+    li [ class "list-group-item" ] [ text todoitem.todo, button [ onClick (RemoveItem   todoitem.id), class "btn btn-info" ] [ text "x" ],
+  input[ class "toggle-all",type_ "checkbox", checked todoitem.completed, onClick (Check todoitem.id (not todoitem.completed)) ][] ]
+               
+               
+             
+
 
 
 todoList : Model -> Html Msg
@@ -113,6 +130,10 @@ todoList todos=
         ul [ class "list-group" ] child
 
 
+
+
+-- alert sections
+
 viewValidation : Model -> Html Msg
 viewValidation model =
    case model.popup of
@@ -122,12 +143,12 @@ viewValidation model =
        succeed model
      2 ->
        deleteitem model
+     3 ->
+       changetocomp model
+
      _ ->
        text " "
 
-  
-
-  
 
 
 succeed : Model -> Html Msg
@@ -155,6 +176,7 @@ deleteitem model =
         |> Alert.view model.alertVisibility
 
 
+
 deleteall : Model -> Html Msg
 deleteall model =
     Alert.config
@@ -165,6 +187,20 @@ deleteall model =
             text "Bütün Yapılacaklar silindi"
             ]
         |> Alert.view model.alertVisibility
+
+
+
+changetocomp : Model -> Html Msg
+changetocomp model =
+    Alert.config
+        |> Alert.primary
+        |> Alert.dismissable AlertMsg
+        |> Alert.children
+            [ 
+            text "İş tamamlandı"
+            ]
+        |> Alert.view model.alertVisibility
+
 
 
 
