@@ -46,7 +46,7 @@ newTodo id todo =
 
 init : Model
 init =
-    {todos =[],entry="",popup =10 ,alertVisibility = Alert.closed,uid=1}  
+    {todos =[],entry="",popup =10 ,alertVisibility = Alert.closed,uid=0}  
 
 --update
 
@@ -66,13 +66,13 @@ update msg model =
          { model | todos = [] ,popup=0,alertVisibility = Alert.shown}
 
        AddTodo ->
-         { model | todos =model.todos ++ [newTodo model.uid  model.entry    ]  ,entry="" ,popup=1,alertVisibility = Alert.shown} 
+         { model | todos =model.todos ++ [newTodo model.uid  model.entry  ], entry="" ,popup=1,alertVisibility = Alert.shown,uid=model.uid+1} 
 
        TodoText text ->
            {model| entry =text }
 
        RemoveItem id ->
-           { model | todos = List.filter (\t -> t.id /= id) model.todos,popup=2,alertVisibility = Alert.shown }
+           { model |  todos = List.filter (\t-> t.id /= id) model.todos,popup=2,alertVisibility = Alert.shown }
         
        AlertMsg visibility ->
             { model | alertVisibility = visibility }
@@ -101,14 +101,14 @@ view model =
 
 todoItem : Todo -> Html Msg
 todoItem todoitem =
-    li [ class "list-group-item" ] [ text todoitem.todo, button [ onClick (RemoveItem todoitem.id), class "btn btn-info" ] [ text "x" ] ]
+    li [ class "list-group-item" ] [ text todoitem.todo, button [ onClick (RemoveItem   todoitem.id), class "btn btn-info" ] [ text "x" ] ]
 
 
 todoList : Model -> Html Msg
-todoList model =
+todoList todos=
     let
         child =
-            List.map todoItem model.todos
+            List.map todoItem todos.todos
     in
         ul [ class "list-group" ] child
 
@@ -165,4 +165,6 @@ deleteall model =
             text "Bütün Yapılacaklar silindi"
             ]
         |> Alert.view model.alertVisibility
+
+
 
