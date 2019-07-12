@@ -1,6 +1,6 @@
 import Browser
 import Http
-import Html exposing (map,text,Html,div,p,ul,button,input,h1,li  )
+import Html exposing (map,text,Html,div,p,ul,button,input,h1,li,br,h3  )
 import Html.Attributes exposing (value,type_ ,checked,class,style)
 import Html.Events exposing (onClick,onInput)
 import Bootstrap.CDN as CDN
@@ -47,13 +47,23 @@ newTodo id todo =
   }
 
 
+getIp : Cmd Msg
+getIp =
+  (
+      Http.get
+        { url = "https://api.ipify.org"
+          , expect = Http.expectString ReceivedIpFromServer
+        }
+            )
+
+
 
 --INIT
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ({alertVisibility = Alert.closed,entry="",popup =10 ,todos =[],uid=0,ip =""} ,Cmd.none)
+    ({alertVisibility = Alert.closed,entry="",popup =10 ,todos =[],uid=0,ip =""},getIp )
   
    
 
@@ -67,7 +77,10 @@ type Msg
     | RemoveAll
     |AlertMsg Alert.Visibility 
     |Check Int Bool   
-    | ReceivedIpFromServer (Result Http.Error String)
+    |ReceivedIpFromServer (Result Http.Error String)
+    
+
+
 
 update : Msg -> Model ->(Model,Cmd Msg)
 update msg model =
@@ -96,6 +109,7 @@ update msg model =
                          t 
             in
               ({ model | todos = List.map updateEntry model.todos ,popup=3,alertVisibility = Alert.shown }, Cmd.none )
+         
         
 
        ReceivedIpFromServer (Ok ip) ->
@@ -103,7 +117,6 @@ update msg model =
 
        ReceivedIpFromServer (Err _) ->
             ( { model | ip = "an error occured" }, Cmd.none )
-
 
 
 
@@ -124,7 +137,8 @@ view model =
       [CDN.stylesheet -- creates an inline style node with the Bootstrap CSS
         ,Grid.row [ Row.centerXs]  
           [Grid.col[Col.lg2] [],     
-         Grid.col [Col.lg8] [ h1 [ ] [ text "TodoList For Beginners" ]
+         Grid.col [Col.lg8] [ h1 [ ] [ text "TodoList For Beginners" ]    
+        ,h3 [] [ text ("Your IP is:" ++ model.ip) ]
         ,viewValidation model
         , input [ value model.entry, onInput TodoText  ] []
         , button [ onClick AddTodo, class "btn btn-primary" ] [ text "Submit" ]
@@ -226,9 +240,6 @@ changetocomp model =
             text "İş tamamlandı"
             ]
         |> Alert.view model.alertVisibility
-
-
-
 
 
 
