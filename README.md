@@ -1,7 +1,7 @@
 # Elm Todo App
 
 Elm Todo App for beginners
-
+![nikosabee](https://user-images.githubusercontent.com/5777945/61140415-1a227a80-a4d4-11e9-844b-105adde89019.png)
 ## How to use this project
 elm reactor
 
