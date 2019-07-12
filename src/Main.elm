@@ -1,17 +1,14 @@
 import Browser
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Http
+import Html exposing (map,text,Html,div,p,ul,button,input,h1,li  )
+import Html.Attributes exposing (value,type_ ,checked,class,style)
 import Html.Events exposing (onClick,onInput)
 import Bootstrap.CDN as CDN
 import Bootstrap.Grid as Grid
 import Bootstrap.Grid.Row as Row 
 import Bootstrap.Grid.Col as Col
-import Bootstrap.ListGroup as Listgroup
-import Bootstrap.Form as Form
-import Bootstrap.Form.Input as Input
-import Bootstrap.Button as Button
 import Bootstrap.Alert as Alert
-import Bootstrap.Form.Checkbox as Checkbox
+
 
 --MAİN
 
@@ -19,7 +16,7 @@ main =
     Browser.document
         { init = init
         , update = update
-        , subscriptions = subscriptions
+        , subscriptions  = always Sub.none
         , view = view
        }
 
@@ -32,6 +29,7 @@ type alias Model =
      ,entry:String
      ,popup:Int
      ,uid : Int
+     ,ip :String
     }
 
 type alias Todo =
@@ -55,7 +53,7 @@ newTodo id todo =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ({alertVisibility = Alert.closed,entry="",popup =10 ,todos =[],uid=0} ,Cmd.none)
+    ({alertVisibility = Alert.closed,entry="",popup =10 ,todos =[],uid=0,ip =""} ,Cmd.none)
   
    
 
@@ -69,7 +67,7 @@ type Msg
     | RemoveAll
     |AlertMsg Alert.Visibility 
     |Check Int Bool   
-
+    | ReceivedIpFromServer (Result Http.Error String)
 
 update : Msg -> Model ->(Model,Cmd Msg)
 update msg model =
@@ -98,12 +96,17 @@ update msg model =
                          t 
             in
               ({ model | todos = List.map updateEntry model.todos ,popup=3,alertVisibility = Alert.shown }, Cmd.none )
+        
 
---SUBSCRİPTİONS
+       ReceivedIpFromServer (Ok ip) ->
+            ( { model | ip = ip }, Cmd.none )
 
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    Sub.none
+       ReceivedIpFromServer (Err _) ->
+            ( { model | ip = "an error occured" }, Cmd.none )
+
+
+
+
 
 
 type alias Document msg =
@@ -223,6 +226,8 @@ changetocomp model =
             text "İş tamamlandı"
             ]
         |> Alert.view model.alertVisibility
+
+
 
 
 
