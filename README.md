@@ -22,5 +22,5 @@ elm reactor
 ## Thanks for helping
 @NikosEfthias @jessta @joelq
 
-##Thanks Elm Slack channel
+## Thanks Elm Slack channel
 
